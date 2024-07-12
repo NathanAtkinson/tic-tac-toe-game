@@ -36,8 +36,14 @@ export default function Home() {
 
     useEffect(() => {
         checkWinner();
-        checkDraw(); //TODO bug that won variable isn't set yet when checkDraw() runs, so winning on last move causes "is draw!" message
     }, [boardData]);
+
+    //This used to check with boardData change but checkWinner wouldn't have updated won variable in time.
+    //This caused a bug for both win and draw to be true if the move that filled up the board also won the game.
+    //Ideally this wouldn't check after anything updating, but we'd have to do something janky like setWon(false) otherwise and listen to it.
+    useEffect(() => {
+        checkDraw();
+    });
 
     const updateBoardData = (index: number) => {
         if (!boardData[index] && !won && !isDraw) {
@@ -48,15 +54,17 @@ export default function Home() {
     };
 
     const checkDraw = () => {
-        let hasEmptySpace = false;
-        for (const key in boardData) {
-            if (boardData[key]?.length == 0) {
-                hasEmptySpace = true;
+        if (!won) {
+            let hasEmptySpace = false;
+            for (const key in boardData) {
+                if (boardData[key]?.length == 0) {
+                    hasEmptySpace = true;
+                }
             }
-        }
 
-        setIsDraw(!hasEmptySpace);
-        if (!hasEmptySpace) setModalTitle("Match Draw!!!");
+            setIsDraw(!hasEmptySpace);
+            if (!hasEmptySpace) setModalTitle("Match Draw!!!");
+        }
     };
 
     const checkWinner = async () => {
